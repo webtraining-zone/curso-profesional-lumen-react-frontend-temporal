@@ -1,45 +1,59 @@
 import React from 'react';
 import UsersService from './services/UsersService';
+import UsersTable from './UsersTable';
+import UsersFormCreate from './UsersFormCreate';
+import UsersChart from './UsersChart';
 
 class UsersIndex extends React.Component {
-  state = {users: []};
+
+  constructor(props) {
+    super(props);
+    this.state = {users: []};
+  }
 
   render() {
     const {users} = this.state;
+
+    const numberOfActiveUsers = users.filter(
+        user => user.status === 'ACTIVE').length;
+    const numberOfInactiveUsers = users.length - numberOfActiveUsers;
+    
     return (
         <div>
-          <h1>Users</h1>
-          <table className="table">
-            <thead className="thead-dark">
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Name</th>
-              <th scope="col">Email</th>
-              <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {
-              users.map(user => (
-                  <tr key={user.id.toString()}>
-                    <th scope="row">1</th>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>TBD</td>
-                  </tr>
-              ))
-            }
-            </tbody>
-          </table>
+          <div className="row">
+            <div className="col-12">
+              <UsersTable users={users}/>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-12 col-md-6">
+              <UsersFormCreate onCreateUser={this.handleOnCreateUser}/>
+            </div>
+
+            <div className="col-12 col-md-6">
+              <UsersChart numberOfActiveUsers={numberOfActiveUsers}
+                          numberOfInactiveUsers={numberOfInactiveUsers}/>
+            </div>
+          </div>
+
+
         </div>
     );
   }
+
+  handleOnCreateUser = (user) => {
+    this.setState(prevState => ({
+      users: [...prevState.users, user],
+    }));
+  };
 
   componentDidMount() {
 
     UsersService.getAllUsers().then(response => {
       this.setState({users: response.data});
     });
+
   }
 
 }
